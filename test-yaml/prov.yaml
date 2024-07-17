@@ -1,0 +1,6 @@
+job_queue: artur-oemscript-2404
+provision_data:
+  distro: jammy
+test_data:
+  test_cmds: |
+    ssh -t ubuntu@$10.102.183.146 lsb_release -a

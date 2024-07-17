@@ -48,6 +48,7 @@ DEVICE_CONNECTORS = (
     "noprovision",
     "oemrecovery",
     "oemscript",
+    "oemscript24",
     "zapper_iot",
     "zapper_kvm",
 )

@@ -26,6 +26,8 @@ To specify the commands to run by the device in each test phase, set the ``testf
      - General device connector that does not support provisioning, but can run tests on a device where provisioning is not needed or not possible to do automatically.
    * - ``oemrecovery`` 
      - device connector where provisioning involves triggering a “recovery” mode to reset the image back to its original state.  This is useful for things like Ubuntu Core images with full disk encryption, which can be preloaded with cloud-init data to ensure user creation, then a command is configured for the device connector that will cause it to be reset back to its original state.
+   * - ``oemscript24`` 
+     - device connector to provision OEM image 24.04 on hp/dell/lenovo.
    * - ``dell_oemscript``
      - This device connector is used for Dell OEM devices running certain versions of OEM supported images that can use a recovery partition to recover not only the same image, but in some cases, other OEM image versions as well.
    * - ``lenovo_oemscript`` 
