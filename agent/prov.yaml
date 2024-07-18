@@ -1,0 +1,7 @@
+job_queue: artur-oemscript-2404
+provision_data:
+  distro: noble
+  #url: https://oem-share.canonical.com/share/somerville/releases/noble/oem-24.04a/20240711-38/somerville-noble-oem-24.04a-20240711-38.iso
+test_data:
+  test_cmds: |
+    ssh -t ubuntu@$10.102.183.146 lsb_release -a

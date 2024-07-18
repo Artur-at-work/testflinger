@@ -66,7 +66,7 @@ class OemScript:
             "StrictHostKeyChecking=no",
             "-o",
             "UserKnownHostsFile=/dev/null",
-            f"{test_username}@{self.config['device_ip']}",
+            f"{test_username}@{self.job_data['device_ip']}",
             cmd,
         ]
         proc = subprocess.run(
@@ -110,7 +110,7 @@ class OemScript:
 
     def run_recovery_script(self, image_file):
         """Download and run the OEM recovery script"""
-        device_ip = self.config["device_ip"]
+        device_ip = self.job_data["device_ip"]
 
         data_path = Path(__file__).parent / "../../data/muxpi/oemscript"
         recovery_script = data_path / "image-deploy.sh"
@@ -159,7 +159,7 @@ class OemScript:
             "StrictHostKeyChecking=no",
             "-o",
             "UserKnownHostsFile=/dev/null",
-            f"{test_username}@{self.config['device_ip']}",
+            f"{test_username}@{self.job_data['device_ip']}",
         ]
         subprocess.check_output(cmd, stderr=subprocess.STDOUT, timeout=60)
 
