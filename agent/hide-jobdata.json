@@ -1,0 +1,9 @@
+{
+  "distro": "noble",
+  "device_ip": "10.102.183.138",
+  "provision_data": {
+    "distro": "noble",
+    "url": "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img"
+  }
+}
+
