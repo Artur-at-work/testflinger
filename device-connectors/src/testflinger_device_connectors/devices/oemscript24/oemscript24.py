@@ -90,6 +90,7 @@ class OemScript:
 
         provision_data = self.job_data.get("provision_data", {})
         image_url = provision_data.get("url")
+        distro = provision_data.get("distro")
 
         # Download the .iso image from image_url
         if not image_url:
@@ -100,7 +101,7 @@ class OemScript:
         try:
             image_file = download(image_url)
 
-            self.run_recovery_script(image_file)
+            self.run_recovery_script(image_file, distro)
 
             self.check_device_booted()
         finally:
@@ -108,25 +109,43 @@ class OemScript:
             if image_file:
                 os.unlink(image_file)
 
-    def run_recovery_script(self, image_file):
+    def run_recovery_script(self, image_file, distro):
         """Download and run the OEM recovery script"""
         device_ip = self.config["device_ip"]
 
         data_path = Path(__file__).parent / "../../data/muxpi/oemscript"
-        recovery_script = data_path / "image-deploy.sh"
+        if distro is "jammy" or distro is "focal":
+            recovery_script = data_path / "recovery-from-iso.sh"
 
-        # Run the recovery script
-        logger.info("Running recovery script")
-        cmd = [
-            recovery_script,
-            *self.extra_script_args,
-            "--local-iso",
-            image_file,
-            "--inject-ssh-key",
-            os.path.expanduser("~/.ssh/id_rsa.pub"),
-            "-t",
-            device_ip,
-        ]
+            # Run the recovery script
+            logger.info("Running recovery script")
+            cmd = [
+                recovery_script,
+                *self.extra_script_args,
+                "--local-iso",
+                image_file,
+                "--inject-ssh-key",
+                os.path.expanduser("~/.ssh/id_rsa.pub"),
+                "-t",
+                device_ip,
+            ]
+        else:
+            # noble and later
+            recovery_script = data_path / "image-deploy.sh"
+
+            # Run the recovery script
+            logger.info("Running recovery script")
+            cmd = [
+                recovery_script,
+                *self.extra_script_args,
+                "--iso",
+                image_file,
+                #"--inject-ssh-key",
+                #os.path.expanduser("~/.ssh/id_rsa.pub"),
+                #"-t",
+                device_ip,
+            ]
+
         proc = subprocess.run(
             cmd,
             timeout=60 * 60,  # 1 hour - just in case
