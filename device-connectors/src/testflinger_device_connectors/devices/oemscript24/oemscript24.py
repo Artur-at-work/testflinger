@@ -115,11 +115,11 @@ class OemScript:
         device_ip = self.config["device_ip"]
 
         data_path = Path(__file__).parent / "../../data/muxpi/oemscript"
+        # Run the recovery script
+        logger.info("Running recovery script")
+
         if distro is "jammy" or distro is "focal":
             recovery_script = data_path / "recovery-from-iso.sh"
-
-            # Run the recovery script
-            logger.info("Running recovery script")
             cmd = [
                 recovery_script,
                 *self.extra_script_args,
@@ -133,17 +133,11 @@ class OemScript:
         else:
             # noble and later
             recovery_script = data_path / "image-deploy.sh"
-
-            # Run the recovery script
-            logger.info("Running recovery script")
             cmd = [
                 recovery_script,
                 *self.extra_script_args,
                 "--iso",
                 image_file,
-                #"--inject-ssh-key",
-                #os.path.expanduser("~/.ssh/id_rsa.pub"),
-                #"-t",
                 device_ip,
             ]
 
