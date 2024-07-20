@@ -2,7 +2,7 @@ job_queue: artur-oemscript-2404
 provision_data:
   distro: noble
   url: https://people.canonical.com/~oem-enablement/iso-image/somerville-noble-oem-24.04a-20240718-44.iso
-  attachements:
+  attachments:
     - local: "ubuntu-oem-image-builder/alloem-init/cloud-configs/redeploy/meta-data"
       agent: "alloem-init/cloud-configs/redeploy/meta-data"
     - local: "ubuntu-oem-image-builder/alloem-init/cloud-configs/redeploy/user-data"

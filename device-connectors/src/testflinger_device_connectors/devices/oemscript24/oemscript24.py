@@ -138,7 +138,8 @@ class OemScript:
                 *self.extra_script_args,
                 "--iso",
                 image_file,
-                "--local-config ./attachements/provision",  # expected that configs were send as attachements
+                "--local-config",
+                "./attachments/provision",  # expected that configs were send as attachements
                 device_ip,
             ]
 
