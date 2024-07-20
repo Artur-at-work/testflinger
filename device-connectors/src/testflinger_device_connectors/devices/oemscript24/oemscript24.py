@@ -99,8 +99,9 @@ class OemScript:
             )
             raise ProvisioningError("No image url provided")
         try:
-            image_file = download(image_url)
-
+            #image_file = download(image_url)
+            #DEBUG
+            image_file = "/home/ubuntu/somerville-noble-oem-24.04a-20240719-45.iso"
             self.run_recovery_script(image_file, distro)
 
             self.check_device_booted()
