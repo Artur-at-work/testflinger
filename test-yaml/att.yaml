@@ -1,0 +1,18 @@
+job_queue: artur-oemscript-2404
+provision_data:
+  distro: noble
+  url: https://people.canonical.com/~oem-enablement/iso-image/somerville-noble-oem-24.04a-20240718-44.iso
+  attachements:
+    - local: "ubuntu-oem-image-builder/alloem-init/cloud-configs/redeploy/meta-data"
+      agent: "alloem-init/cloud-configs/redeploy/meta-data"
+    - local: "ubuntu-oem-image-builder/alloem-init/cloud-configs/redeploy/user-data"
+      agent: "alloem-init/cloud-configs/redeploy/user-data"
+    - local: "ubuntu-oem-image-builder/alloem-init/cloud-configs/grub/redeploy.cfg"
+      agent: "alloem-init/cloud-configs/grub/redeploy.cfg"
+    - local: "ubuntu-oem-image-builder/injections/alloem-init/chroot/minimal.standard.live.hotfix.squashfs/etc/ssh/authorized_keys"
+      agent: "injections/alloem-init/chroot/minimal.standard.live.hotfix.squashfs/etc/ssh/authorized_keys"
+    - local: "ubuntu-oem-image-builder/injections/alloem-init/chroot/minimal.standard.live.hotfix.squashfs/etc/ssh/sshd_config.d/pc_sanity.conf"
+      agent: "injections/alloem-init/chroot/minimal.standard.live.hotfix.squashfs/etc/ssh/sshd_config.d/pc_sanity.conf"
+test_data:
+  test_cmds: |
+    ssh -t ubuntu@$10.102.183.138 lsb_release -a

@@ -49,11 +49,12 @@ SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 SSH="ssh $SSH_OPTS"
 SCP="scp $SSH_OPTS"
 
-if [ ! -d "$HOME/.caceh/oem-scripts" ]; then
+if [ ! -d "$HOME/.cache/oem-scripts" ]; then
     mkdir -p "$HOME/.cache/oem-scripts"
 fi
 
-OPTS="$(getopt -o u:o: --long iso:,user:,timeout:,url: -n 'image-deploy.sh' -- "$@")"
+#OPTS="$(getopt -o u:o: --long iso:,user:,timeout:,url: -n 'image-deploy.sh' -- "$@")"
+OPTS="$(getopt -o u:o:l: --long iso:,user:,timeout:,url:,local-config: -n 'image-deploy.sh' -- "$@")"
 eval set -- "${OPTS}"
 while :; do
     case "$1" in
@@ -111,6 +112,10 @@ while :; do
         ('-o'|'--timeout')
             TIMEOUT="$2"
             shift 2;;
+        ('-l'|'--local-config')
+            CONFIG_REPO_PATH="$2"
+            SKIP_GIT="TRUE"
+            shift 2;;
 	('--') shift; break ;;
 	(*) break ;;
     esac
@@ -124,10 +129,12 @@ fi
 read -ra TARGET_IPS <<< "$@"
 
 # Download config repo to local
-if [ ! -d "$CONFIG_REPO_PATH" ]; then
-    git -C "$HOME/.cache/oem-scripts" clone -b noble "$CONFIG_REPO_REMOTE"
-else
-    git -C "$CONFIG_REPO_PATH" pull
+if [ -z "${SKIP_GIT:-}" ]; then
+    if [ ! -d "$CONFIG_REPO_PATH" ]; then
+        git -C "$HOME/.cache/oem-scripts" clone -b noble "$CONFIG_REPO_REMOTE"
+    else
+        git -C "$CONFIG_REPO_PATH" pull
+    fi
 fi
 
 for addr in "${TARGET_IPS[@]}";
