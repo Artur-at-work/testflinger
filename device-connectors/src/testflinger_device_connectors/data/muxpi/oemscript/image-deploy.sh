@@ -2,9 +2,12 @@
 
 exec 2>&1
 set -euox pipefail
+# This script was adapted to testflinger agent environment and used
+# to provision OEM devices with Ubuntu Noble images
 
+# --url flag and config.sh are not used, because agent is in charge of ISO download
 # shellcheck source=config.sh
-source config.sh || source /usr/share/oem-scripts/config.sh 2>/dev/null
+# source config.sh || source /usr/share/oem-scripts/config.sh 2>/dev/null
 
 usage()
 {

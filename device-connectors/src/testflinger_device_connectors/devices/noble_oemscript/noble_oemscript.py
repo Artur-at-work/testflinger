@@ -12,28 +12,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Ubuntu OEM Recovery provisioner support code."""
+"""Ubuntu OEM Script provisioning for OEM devices with Ubuntu Noble series
+For systems that can use the oem image-deploy.sh script for provisioning
+"""
 
 import logging
-
-from testflinger_device_connectors.devices import (
-    DefaultDevice,
-    RecoveryError,
-    catch,
-)
-from testflinger_device_connectors.devices.oemscript24.oemscript24 import OemScript
+from testflinger_device_connectors.devices.oemscript.oemscript import OemScript
 
 logger = logging.getLogger(__name__)
 
 
-class DeviceConnector(DefaultDevice):
-    """Tool for provisioning baremetal with a given image."""
-
-    @catch(RecoveryError, 46)
-    def provision(self, args):
-        """Method called when the command is invoked."""
-        device = OemScript(args.config, args.job_data)
-        logger.info("BEGIN provision")
-        logger.info("Provisioning device")
-        device.provision()
-        logger.info("END provision")
+class NobleOemScript(OemScript):
+    """Device Agent for Noble OEM devices."""
+    # Extra arguments to pass to the OEM script
+    extra_script_args = ["--local-config", "./attachments/provision"] 

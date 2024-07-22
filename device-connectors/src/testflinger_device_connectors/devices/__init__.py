@@ -40,7 +40,7 @@ DEVICE_CONNECTORS = (
     "dragonboard",
     "fake_connector",
     "hp_oemscript",
-    "lenovo_oemscript",
+    "noble_oemscript",
     "maas2",
     "multi",
     "muxpi",
@@ -48,7 +48,6 @@ DEVICE_CONNECTORS = (
     "noprovision",
     "oemrecovery",
     "oemscript",
-    "oemscript24",
     "zapper_iot",
     "zapper_kvm",
 )
