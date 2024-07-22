@@ -29,6 +29,7 @@ from testflinger_device_connectors.devices import (
 )
 
 logger = logging.getLogger(__name__)
+attachments_dir = os.path.join(Path.cwd(), "attachments/provision")
 
 
 class OemScript:
@@ -94,14 +95,26 @@ class OemScript:
 
         # Download the .iso image from image_url
         if not image_url:
-            logger.error(
-                "Please provide an image 'url' in the provision_data section"
-            )
-            raise ProvisioningError("No image url provided")
+            image_name = provision_data.get("use_attachment")
+            if not image_name:
+                logger.error(
+                    "Please provide an image 'url' or 'use_attachment' "
+                    "in the provision_data section"
+                )
+                raise ProvisioningError("No image url provided")
+            
+            image_file = os.path.join(attachments_dir, image_name)
+            if not image_file.exists():
+                raise ProvisioningError(
+                    'In the "provision_data" section of your job_data '
+                    'you have provided a value for "use_attachment" but '
+                    f"that attachment doesn't exist: {image_file}"
+                )
         try:
-            #image_file = download(image_url)
-            #DEBUG
-            image_file = "/tmp/somerville-noble-oem-24.04a-20240719-45.iso"
+            if not image_file:
+                image_file = download(image_url)
+            # DEBUG
+            # image_file = "/tmp/somerville-noble-oem-24.04a-20240719-45.iso"
             self.run_recovery_script(image_file, distro)
 
             self.check_device_booted()
@@ -118,7 +131,7 @@ class OemScript:
         # Run the recovery script
         logger.info("Running recovery script")
 
-        if distro is "jammy" or distro is "focal":
+        if distro == "jammy" or distro == "focal":
             recovery_script = data_path / "recovery-from-iso.sh"
             cmd = [
                 recovery_script,
@@ -138,8 +151,8 @@ class OemScript:
                 *self.extra_script_args,
                 "--iso",
                 image_file,
-                #"--local-config",
-                #"./attachments/provision",  # expected that configs were send as attachements
+                "--local-config",
+                attachments_dir,
                 device_ip,
             ]
 

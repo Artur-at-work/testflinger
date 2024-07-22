@@ -24,5 +24,3 @@ logger = logging.getLogger(__name__)
 
 class NobleOemScript(OemScript):
     """Device Agent for Noble OEM devices."""
-    # Extra arguments to pass to the OEM script
-    extra_script_args = ["--local-config", "./attachments/provision"] 

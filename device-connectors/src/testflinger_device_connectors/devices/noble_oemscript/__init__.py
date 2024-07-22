@@ -14,8 +14,9 @@
 
 """
 Ubuntu OEM Recovery Provisioning for OEM laptops with Ubuntu Noble series.
-Starting from 24.04 OEM uses the same image and script for all vendors (HP, Dell, Lenovo).
-Use this for systems that can use the oem image-deploy.sh script for provisioning.
+Starting from 24.04 OEM uses the same image and script for all vendors.
+Use this for systems that can use the oem image-deploy.sh script
+for provisioning.
 """
 
 import logging
