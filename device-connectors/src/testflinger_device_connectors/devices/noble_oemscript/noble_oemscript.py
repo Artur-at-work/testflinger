@@ -13,7 +13,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """Ubuntu OEM Script provisioning for OEM devices with Ubuntu Noble series
-For systems that can use the oem image-deploy.sh script for provisioning
+For systems that use the oem image-deploy.sh script for provisioning
 """
 
 import logging
@@ -24,3 +24,5 @@ logger = logging.getLogger(__name__)
 
 class NobleOemScript(OemScript):
     """Device Agent for Noble OEM devices."""
+
+    distro = "noble"

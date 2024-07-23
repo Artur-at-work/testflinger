@@ -91,30 +91,11 @@ class OemScript:
 
         provision_data = self.job_data.get("provision_data", {})
         image_url = provision_data.get("url")
-        distro = provision_data.get("distro")
+        distro = self.distro
 
         # Download the .iso image from image_url
-        if not image_url:
-            image_name = provision_data.get("use_attachment")
-            if not image_name:
-                logger.error(
-                    "Please provide an image 'url' or 'use_attachment' "
-                    "in the provision_data section"
-                )
-                raise ProvisioningError("No image url provided")
-            
-            image_file = os.path.join(attachments_dir, image_name)
-            if not image_file.exists():
-                raise ProvisioningError(
-                    'In the "provision_data" section of your job_data '
-                    'you have provided a value for "use_attachment" but '
-                    f"that attachment doesn't exist: {image_file}"
-                )
         try:
-            if not image_file:
-                image_file = download(image_url)
-            # DEBUG
-            # image_file = "/tmp/somerville-noble-oem-24.04a-20240719-45.iso"
+            image_file = download(image_url)
             self.run_recovery_script(image_file, distro)
 
             self.check_device_booted()
@@ -131,7 +112,18 @@ class OemScript:
         # Run the recovery script
         logger.info("Running recovery script")
 
-        if distro == "jammy" or distro == "focal":
+        if distro == "noble":
+            recovery_script = data_path / "image-deploy.sh"
+            cmd = [
+                recovery_script,
+                *self.extra_script_args,
+                "--iso",
+                image_file,
+                "--local-config",
+                attachments_dir,
+                device_ip,
+            ]
+        else:
             recovery_script = data_path / "recovery-from-iso.sh"
             cmd = [
                 recovery_script,
@@ -141,18 +133,6 @@ class OemScript:
                 "--inject-ssh-key",
                 os.path.expanduser("~/.ssh/id_rsa.pub"),
                 "-t",
-                device_ip,
-            ]
-        else:
-            # noble and later
-            recovery_script = data_path / "image-deploy.sh"
-            cmd = [
-                recovery_script,
-                *self.extra_script_args,
-                "--iso",
-                image_file,
-                "--local-config",
-                attachments_dir,
                 device_ip,
             ]
 
