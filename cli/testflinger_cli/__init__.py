@@ -326,12 +326,25 @@ class TestflingerCli:
     def extract_attachment_data(job_data: dict) -> Optional[dict]:
         """Pull together the attachment data per phase from the `job_data`"""
         attachment_data = {}
+        print("job_data---")
+        print(job_data)
+        print("-----------")
         for phase in ("provision", "firmware_update", "test"):
+
+            print(f"==={phase}===")
             phase_str = f"{phase}_data"
-            try:
-                attachment_data[phase] = job_data[phase_str]["attachments"]
-            except KeyError:
-                pass
+            attachments = []
+            if job_data.get(phase_str, {}).get('attachments'):
+                attachments = job_data[phase_str]["attachments"]
+
+            if job_data.get(phase_str, {}).get('install_configs'):
+                attachments += job_data[phase_str]["install_configs"]
+
+            if attachments:
+                attachment_data[phase] = attachments
+
+        print("attachment_data:-------")
+        print(attachment_data)
         return attachment_data or None
 
     @staticmethod
@@ -349,6 +362,7 @@ class TestflingerCli:
             for phase, attachments in attachment_data.items():
                 phase_path = Path(phase)
                 for attachment in attachments:
+                    print(f"attachment: \n {attachment}")
                     local_path = Path(attachment["local"])
                     # determine archive name for attachment
                     # (essentially: the destination path on the agent host)

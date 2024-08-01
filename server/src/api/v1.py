@@ -84,8 +84,10 @@ def job_post(json_data: dict):
 
 def has_attachments(data: dict) -> bool:
     """Predicate if the job described by `data` involves attachments"""
+    print("has_attachemnts(data):---")
+    print(data)
     return any(
-        nested_field == "attachments"
+        nested_field in ("attachments", "install_configs")
         for field, nested_dict in data.items()
         if field.endswith("_data")
         for nested_field in nested_dict
