@@ -38,6 +38,54 @@ if [ ! -d "$HOME/.cache/oem-scripts" ]; then
     mkdir -p "$HOME/.cache/oem-scripts"
 fi
 
+create_redeploy_cfg() {
+    # generates grub.cfg file to start the redeployment
+    local filename=$1
+
+    cat <<EOL > "$filename"
+set timeout=3
+
+loadfont unicode
+
+set menu_color_normal=white/black
+set menu_color_highlight=black/light-gray
+
+if [ -s (\$root)/boot/grub/theme/theme.cfg ]; then
+    source (\$root)/boot/grub/theme/theme.cfg
+fi
+
+menuentry "Start redeployment" {
+    set gfxpayload=keep
+    linux   /casper/vmlinuz layerfs-path=minimal.standard.live.hotfix.squashfs nopersistent ds=nocloud;s=/cdrom/cloud-configs/redeploy --- quiet splash nomodeset modprobe.blacklist=nouveau nouveau.modeset=0 autoinstall rp-partuuid=RP_PARTUUID
+    initrd  /casper/initrd
+}
+menuentry "Start normal reset installation" {
+    set gfxpayload=keep
+    linux   /casper/vmlinuz layerfs-path=minimal.standard.live.hotfix.squashfs nopersistent ds=nocloud;s=/cdrom/cloud-configs/reset-media --- quiet splash nomodeset modprobe.blacklist=nouveau nouveau.modeset=0
+    initrd  /casper/initrd
+}
+grub_platform
+if [ "\$grub_platform" = "efi" ]; then
+menuentry 'UEFI firmware settings' {
+    fwsetup
+}
+fi
+EOL
+
+    echo "'$filename' was generated with default content."
+}
+
+create_sshd_conf() {
+    # generates config to enable the exported authorized_keys file
+    local filename=$1
+
+    cat <<EOL > "$filename"
+AuthorizedKeysFile .ssh/authorized_keys /etc/ssh/authorized_keys
+EOL
+
+    echo "'$filename' was generated with default content."
+}
+
 OPTS="$(getopt -o u:o:l: --long iso:,user:,timeout:,local-config: -n 'image-deploy.sh' -- "$@")"
 eval set -- "${OPTS}"
 while :; do
@@ -109,13 +157,20 @@ do
         # configs in current dir are without folder structure
         $SCP "$CONFIG_REPO_PATH"/meta-data "$TARGET_USER"@"$addr":/home/"$TARGET_USER"/redeploy/cloud-configs/redeploy/
         $SCP "$CONFIG_REPO_PATH"/user-data "$TARGET_USER"@"$addr":/home/"$TARGET_USER"/redeploy/cloud-configs/redeploy/
-        $SCP "$CONFIG_REPO_PATH"/grub.cfg "$TARGET_USER"@"$addr":/home/"$TARGET_USER"/redeploy/cloud-configs/grub/redeploy.cfg
+
+        if [ ! -r "$CONFIG_REPO_PATH"/redeploy.cfg ]; then
+            create_redeploy_cfg "$CONFIG_REPO_PATH"/redeploy.cfg
+        fi
+        $SCP "$CONFIG_REPO_PATH"/redeploy.cfg "$TARGET_USER"@"$addr":/home/"$TARGET_USER"/redeploy/cloud-configs/grub/redeploy.cfg
 
         # ssh configs are expected to be deployed as a directory
         mkdir -p "$CONFIG_REPO_PATH"/ssh/sshd_config.d
+
+        create_sshd_conf "$CONFIG_REPO_PATH"/ssh/sshd_config.d/pc_sanity.conf
+        #cp "$CONFIG_REPO_PATH"/sshd.conf "$CONFIG_REPO_PATH"/ssh/sshd_config.d/pc_sanity.conf
         cp "$CONFIG_REPO_PATH"/authorized_keys "$CONFIG_REPO_PATH"/ssh
-        cp "$CONFIG_REPO_PATH"/sshd.conf "$CONFIG_REPO_PATH"/ssh/sshd_config.d/pc_sanity.conf
         $SCP -r "$CONFIG_REPO_PATH"/ssh "$TARGET_USER"@"$addr":/home/"$TARGET_USER"/redeploy/ssh-config
+
         rm -rf "$CONFIG_REPO_PATH"/ssh
     else
         # configs follow launchapd repo folder structure
