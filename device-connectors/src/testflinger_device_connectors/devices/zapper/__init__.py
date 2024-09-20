@@ -56,7 +56,7 @@ class ZapperConnector(ABC, DefaultDevice):
         with open(args.job_data, encoding="utf-8") as job_json:
             self.job_data = json.load(job_json)
 
-        logger.info("BEGIN provision base ZAPPER")
+        logger.info("BEGIN provision")
         logger.info("Provisioning device")
 
         (api_args, api_kwargs) = self._validate_configuration()
