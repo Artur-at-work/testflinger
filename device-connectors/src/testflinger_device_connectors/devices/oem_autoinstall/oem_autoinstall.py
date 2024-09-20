@@ -48,6 +48,7 @@ class OemAutoinstall:
     def provision(self):
         """Provision the device"""
 
+        logger.info("BEGIN provision")
         # Ensure the device is online and reachable
         try:
             self.test_ssh_access()
@@ -89,6 +90,8 @@ class OemAutoinstall:
             token_file_path = "url_token"
             self.copy_to_deploy_path(token_file, token_file_path)
         self.run_deploy_script(image_url)
+
+        logger.info("END provision")
 
     def copy_to_deploy_path(self, source_path, dest_path):
         """

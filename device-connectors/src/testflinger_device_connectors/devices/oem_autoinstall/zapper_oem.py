@@ -21,69 +21,20 @@ import logging
 import os
 import subprocess
 from typing import Any, Dict, Optional, Tuple
-
+from pathlib import Path
 import yaml
+
 from testflinger_device_connectors.devices import ProvisioningError
 from testflinger_device_connectors.devices.zapper import ZapperConnector
-from testflinger_device_connectors.devices.oemscript import OemScript
-from testflinger_device_connectors.devices.lenovo_oemscript import (
-    LenovoOemScript,
-)
-from testflinger_device_connectors.devices.dell_oemscript import DellOemScript
-from testflinger_device_connectors.devices.hp_oemscript import HPOemScript
 
 logger = logging.getLogger(__name__)
+ATTACHMENTS_DIR = "attachments"
+ATTACHMENTS_PROV_DIR = Path.cwd() / ATTACHMENTS_DIR / "provision"
 
-
-class DeviceConnector(ZapperConnector):
+class ZapperConnectorOem(ZapperConnector):
     """Tool for provisioning baremetal with a given image."""
 
     PROVISION_METHOD = "ProvisioningOEM"
-
-    def _validate_base_user_data(self, encoded_user_data: str):
-        """
-        Assert `base_user_data` argument is a valid base64 encoded YAML.
-        """
-        try:
-            user_data = base64.b64decode(encoded_user_data.encode()).decode()
-            yaml.safe_load(user_data)
-        except (binascii.Error, ValueError) as exc:
-            raise ProvisioningError(
-                "Provided `base_user_data` is not base64 encoded."
-            ) from exc
-        except yaml.YAMLError as exc:
-            raise ProvisioningError(
-                "Provided `base_user_data` is not a valid YAML."
-            ) from exc
-
-    def _get_autoinstall_conf(self) -> Optional[Dict[str, Any]]:
-        """
-        Autoinstall-related keys are pre-fixed with `autoinstall_`.
-
-        If any of those arguments are provided and valid, the function
-        returns an autoinstall_conf dictionary, including the agent
-        SSH public key.
-        """
-
-        autoinstall_conf = {}
-        for key, value in self.job_data["provision_data"].items():
-            if "autoinstall_" not in key:
-                continue
-
-            key = key.replace("autoinstall_", "")
-            with contextlib.suppress(AttributeError):
-                getattr(self, f"_validate_{key}")(value)
-
-            autoinstall_conf[key] = value
-
-        if not autoinstall_conf:
-            logger.info("Autoinstall-related keys were not provided.")
-            return None
-
-        with open(os.path.expanduser("~/.ssh/id_rsa.pub")) as pub:
-            autoinstall_conf["authorized_keys"] = [pub.read()]
-
-        return autoinstall_conf
 
     def _validate_configuration(
         self,
@@ -109,6 +60,8 @@ class DeviceConnector(ZapperConnector):
                 "test_password", "ubuntu"
             )
             retries = self.job_data["provision_data"].get("robot_retries", 1)
+
+
 
         provisioning_data = {
             "url": url,
@@ -139,6 +92,77 @@ class DeviceConnector(ZapperConnector):
         )
 
         return ((), provisioning_data)
+
+
+
+    def _get_autoinstall_conf(self) -> Optional[Dict[str, Any]]:
+        """
+        Generate base64 autoinstall config based on user-data and authorized
+        keys sent with attachments
+        """
+        provision_data = self.job_data.get("provision_data", {})
+        user_data_file = self._get_attachment_file(provision_data.get("user_data"))
+        authorized_keys_file = self._get_attachment_file(provision_data.get("authorized_keys"))
+        # token_file = provision_data.get("token_file")
+        # redeploy_cfg = provision_data.get("redeploy_cfg")
+        # authorized_keys = provision_data.get("authorized_keys")
+        with open(user_data_file, 'r', encoding='utf-8') as f:
+            user_data = yaml.safe_load(f)
+
+            if authorized_keys_file is not None and os.path.exists(authorized_keys_file):
+                with open(authorized_keys_file, 'r', encoding='utf-8') as keys_file:
+                    authorized_keys = keys_file.read().strip().splitlines()
+                    authorized_keys = [key for key in authorized_keys if key]  # clean empty lines
+                    if 'ssh_authorized_keys' not in user_data['autoinstall']['user-data']:
+                        user_data['autoinstall']['user-data']['ssh_authorized_keys'] = []
+                    user_data['autoinstall']['user-data']['ssh_authorized_keys'].extend(authorized_keys)
+                    # TODO: add id_rsa.pub of this.host?
+            user_data_str = yaml.dump(user_data, default_flow_style=False)
+            user_data_64 = base64.b64encode(user_data_str.encode('utf-8')).decode('utf-8')
+
+        autoinstall_conf = {}
+        autoinstall_conf['base_user_data'] = user_data_64
+
+        # for key, value in self.job_data["provision_data"].items():
+        #     if "autoinstall_" not in key:
+        #         continue
+
+        #     key = key.replace("autoinstall_", "")
+        #     with contextlib.suppress(AttributeError):
+        #         getattr(self, f"_validate_{key}")(value)
+
+        #     autoinstall_conf[key] = value
+
+        # if not autoinstall_conf:
+        #     logger.info("Autoinstall-related keys were not provided.")
+        #     return None
+
+        # with open(os.path.expanduser("~/.ssh/id_rsa.pub")) as pub:
+        #     autoinstall_conf["authorized_keys"] = [pub.read()]
+
+        return autoinstall_conf
+
+    def _get_attachment_file(self, filepath):
+        filepath = Path(filepath)
+        if filepath.is_absolute():
+            filepath = filepath.relative_to("/")
+        return ATTACHMENTS_PROV_DIR / filepath
+
+    def _validate_base_user_data(self, encoded_user_data: str):
+        """
+        Assert `base_user_data` argument is a valid base64 encoded YAML.
+        """
+        try:
+            user_data = base64.b64decode(encoded_user_data.encode()).decode()
+            yaml.safe_load(user_data)
+        except (binascii.Error, ValueError) as exc:
+            raise ProvisioningError(
+                "Provided `base_user_data` is not base64 encoded."
+            ) from exc
+        except yaml.YAMLError as exc:
+            raise ProvisioningError(
+                "Provided `base_user_data` is not a valid YAML."
+            ) from exc
 
     def _post_run_actions(self, args):
         super()._post_run_actions(args)
