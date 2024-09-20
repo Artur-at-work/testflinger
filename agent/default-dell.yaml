@@ -1,0 +1,6 @@
+device_ip: 10.102.182.143
+reboot_script: 
+  #- "sshpass -p 'gjkmif78' ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null artur@10.102.182.143 -- echo gjkmif78 | sudo -S reboot"
+  - sshpass -p 'ubuntu' ssh -o StrictHostKeyChecking=no ubuntu@10.102.182.143 'echo ubuntu | sudo -S reboot'
+  - return 0 
+control_host: 10.102.239.214

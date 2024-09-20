@@ -1,0 +1,17 @@
+job_queue: artur-oemscript-2404
+provision_data:
+  use_zapper: true
+  url: http://10.102.196.9/stella/releases/noble/oem-24.04a/20240709-22/stella-noble-oem-24.04a-20240709-22.iso 
+  skip_download: true
+  robot_tasks:
+    #- hp/boot/wait_reboot.robot 
+    - hp/blind/boot/5.robot
+    - common/grub/autoinstall/http/configure_autoinstall_http_hid.robot
+    - hp/blind/boot/wait_reboot.robot
+  #robot_retries: 4
+test_data:
+  test_cmds: |
+    ssh -t ubuntu@$DEVICE_IP "ls"
+reserve_data:
+  ssh_keys:
+    - lp:artur-at-work

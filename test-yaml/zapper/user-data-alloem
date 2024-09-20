@@ -1,0 +1,97 @@
+#cloud-config
+# vim: syntax=yaml
+
+autoinstall:
+  version: 1
+
+  storage:
+    layout:
+      name: direct
+      reset-partition: 12G
+
+  apt:
+    sources:
+      pc-enablement-tools:
+        source: ppa:oem-solutions-engineers/pc-enablement-tools
+
+  packages:
+    - ssh-import-id
+    ## Install packages for OEM tasks
+    #- bughamsterc
+    #- oem-fix-misc-c3-cid-applier
+    #- oem-initial-test-scripts
+
+  #late-commands:
+  #  - "[ -d /cdrom/sideloads ] && bash /cdrom/sideloads/hook.sh reset-media-late-commands || true"
+  #  - "bash /factory-reset/cloud-configs/grub/switch-stage.sh /factory-reset/cloud-configs/grub/reset-partition.cfg /factory-reset/boot/grub/grub.cfg"
+  
+  ssh:
+    authorized_keys:
+      - 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC99stuofDig7twITgS1+klllE9WbdXGmZPxwFIvT0fvl9Uif/YNltz4zPrYng28s3n/rwAy7YyK3KXAMJV2bS2BmspgzZhAeFR4Yj2Znqa48xd3/VzTj76tqHxflPsZFvZLBAJwQumirUEIY1jdpHoM5emjge/WtGe6qulE1IzZGyxF2vs8eXbGIphuzjUgHzrTDOmvDHgkFDuRQWwUJ/G4Ck28eiSRv0pk4kTI2bFl7YKrRgVc1NJtVGzc5Zt9pdsHJsuE0ejDsIwnz4g+m7S1wDONj7vm7sX7NC1JzAYVCURcuPFQ4mh7fxp9UbtYUmFXyXKL4FlwMQpY9J4RfX6szuZSTM/QPoW6/NCBWU9UJp56/6yABcZAuRDOIgTO9SSbSX8tlwYCu5OBOlYSEXcdla7+GyVpJyWckmOS7IlA+AUXWTN9DslEYHCr51Aujw3foDKgUCiJirHpwThJM/bwKTpQNg9ixQ6xFxMcQHOZLpkaEb5M+pmwxhD6brfte8= k8s@k8s'
+  user-data:
+    users:
+      - name: ubuntu
+        plain_text_passwd: 'ubuntu'
+        homedir: /home/ubuntu
+        shell: /bin/bash
+        lock_passwd: false
+        gecos: Ubuntu all-oem-init
+        groups: [adm, cdrom, dip, lxd, sudo]
+    write_files:
+      - content: |
+          [daemon]
+          AutomaticLoginEnable=True
+          AutomaticLogin=ubuntu
+        path: /etc/gdm3/custom.conf
+        append: true
+
+    ## Import SSH keys from Launchpad
+    # TODO: install ssh-import-id in base image
+    ssh_import_id:
+      - lp:albertomilone
+      - lp:andch
+      - lp:anthonywong
+      - lp:aristochen
+      - lp:pseudoc
+      - lp:binli
+      - lp:townsend
+      - lp:cyruslien
+      - lp:dirksu
+      - lp:ethan.hsieh
+      - lp:hui.wang
+      - lp:os369510
+      - lp:wenchien
+      - lp:kchsieh
+      - lp:lexbuilder
+      - lp:mreed8855
+      - lp:oem-taipei-bot
+      - lp:ondrak
+      - lp:chihchun
+      - lp:robertliu
+      - lp:rmartin013
+      - lp:fourdollars
+      - lp:sverdy
+      - lp:awe
+      - lp:medicalwei
+      - lp:vicamo
+      - lp:sil2100
+      - lp:artur-at-work
+
+    package_update: false
+    package_upgrade: false
+    package_reboot_if_required: true
+
+    #packages:
+    #  - snap:
+    #    - certbot
+    #    - [juju, --edge]
+    #    - [lxd, --channel=5.15/stable]
+    #  - apt:
+    #    - mg
+
+    bootcmd:
+      - ['plymouth', 'display-message', '--text', 'Running cloud-init for alloem ...']
+      #- "[ -d /sp-bootstrap ] && bash /sp-bootstrap/hook.sh early-welcome || true"
+
+bootcmd:
+  - ['plymouth', 'display-message', '--text', 'Starting alloem-init installer...']

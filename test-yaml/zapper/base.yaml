@@ -1,0 +1,6 @@
+job_queue: zapper-kvm-artur-pc
+provision_data:
+  url: 123.com
+test_data:
+  test_cmds: |
+    ssh -t ubuntu@$10.102.183.146 lsb_release -a

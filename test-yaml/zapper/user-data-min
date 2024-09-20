@@ -1,0 +1,30 @@
+#cloud-config
+autoinstall:
+  version: 1
+
+  # User setup
+  user-data:
+    username: "ubuntu"
+    password: "$6$rounds=656000$salt$hash"  # Replace with your actual hashed password
+    groups: [sudo]
+
+  # Storage configuration
+  storage:
+    layout:
+      name: direct
+      config:
+        - id: disk0
+          type: disk
+          match:
+            size: 100G
+          wipe: superblock-recovery
+          preserve: false
+          part:
+            - id: part1
+              size: 100G
+              fs: ext4
+              mount: /
+
+  # Timezone
+  timezone: "Etc/UTC"
+

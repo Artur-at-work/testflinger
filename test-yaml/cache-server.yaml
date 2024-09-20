@@ -1,0 +1,11 @@
+job_queue: artur-oemscript-2404
+provision_data:
+  url: https://tel-image-cache.canonical.com/oem-share/stella/releases/noble/oem-24.04a/20240822-59/stella-noble-oem-24.04a-20240822-59.iso
+  user_data: "ubuntu-oem-image-builder/alloem-init/cloud-configs/redeploy/user-data"
+  authorized_keys: "ubuntu-oem-image-builder/injections/alloem-init/chroot/minimal.standard.live.hotfix.squashfs/etc/ssh/authorized_keys"
+  attachments:
+    - local: "ubuntu-oem-image-builder/alloem-init/cloud-configs/redeploy/user-data"
+    - local: "ubuntu-oem-image-builder/injections/alloem-init/chroot/minimal.standard.live.hotfix.squashfs/etc/ssh/authorized_keys"
+test_data:
+  test_cmds: |
+    ssh -t ubuntu@$10.102.183.138 lsb_release -a
