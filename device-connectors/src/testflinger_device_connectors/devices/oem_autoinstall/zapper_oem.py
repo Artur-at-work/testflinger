@@ -101,11 +101,20 @@ class ZapperConnectorOem(ZapperConnector):
         keys sent with attachments
         """
         provision_data = self.job_data.get("provision_data", {})
-        user_data_file = self._get_attachment_file(provision_data.get("user_data"))
-        authorized_keys_file = self._get_attachment_file(provision_data.get("authorized_keys"))
+        try:
+            user_data_file = self._get_attachment_file(provision_data.get("user_data"))
+
+        except Exception as e:
+            raise ProvisioningError(
+                "user_data key is missing"
+            ) from e
+        if provision_data.get("authorized_keys"):
+            authorized_keys_file = self._get_attachment_file(provision_data.get("authorized_keys"))
+
         # token_file = provision_data.get("token_file")
         # redeploy_cfg = provision_data.get("redeploy_cfg")
         # authorized_keys = provision_data.get("authorized_keys")
+
         with open(user_data_file, 'r', encoding='utf-8') as f:
             user_data = yaml.safe_load(f)
 
@@ -143,7 +152,7 @@ class ZapperConnectorOem(ZapperConnector):
         return autoinstall_conf
 
     def _get_attachment_file(self, filepath):
-        filepath = Path(filepath)
+        filepath = Path(str(filepath))
         if filepath.is_absolute():
             filepath = filepath.relative_to("/")
         return ATTACHMENTS_PROV_DIR / filepath
