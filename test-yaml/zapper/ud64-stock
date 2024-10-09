@@ -1,0 +1,15 @@
+autoinstall:
+  version: 1
+  user-data:
+     users:
+       - name: ubuntu
+         passwd: $6$exDY1mhS4KUYCE/2$zmn9ToZwTKLhCw.b4/b.ZRTIZM30JZ4QrOQ2aOXJ8yk96xpcCof0kxKwuX1kqLG/ygbJ1f8wxED22bTL4F46P0
+         sudo: ALL=(ALL) NOPASSWD:ALL
+  ssh:
+    install-server: true
+    allow-pw: true
+    authorized-keys:
+       - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCYUa9VOGB5NBJzRQ7OnxG4Z6ynBs+B2+A49RVcNWhzWtwPkEeefsHDIz0VLbVSfGJGQMF2Dsw8PVJWBRTBvc1bkHt3sUCZklAmGVbOhXEaXS/GzCjMEb0Kg8jvEzH3WxLm0X4fIQeIDAE6Za/t5ix3uNwYgzZiGT7isx7aDQtpOrZD+y2n3F1xvDPdySJ304hAkAvMGnkwstNXduUXrnOEoPeOrQbk+k85otyaGqL0C/U+SkeeAKnzikmvxrZlcp2zxow8iGMThVNXI5nA9BKx4v21nnIKnhVwZ43ltp9dQoafOXbNtYTxTnFvmaHQ1WFJ+1/fDAY8tfbjQaIxPvPJ ubuntu@juju-machine-8-lxc-0
+  storage:
+    layout:
+      name: lvm
