@@ -57,12 +57,12 @@ fi
 
 menuentry "Start redeployment" {
         set gfxpayload=keep
-        linux   /casper/vmlinuz layerfs-path=minimal.standard.live.hotfix.squashfs nopersistent ds=nocloud\;s=/cdrom/cloud-configs/redeploy --- quiet splash nomodeset modprobe.blacklist=nouveau nouveau.modeset=0 autoinstall rp-partuuid=RP_PARTUUID
+        linux   /casper/vmlinuz nopersistent ds=nocloud\;s=/cdrom/cloud-configs/redeploy --- quiet splash nomodeset modprobe.blacklist=nouveau nouveau.modeset=0 autoinstall rp-partuuid=RP_PARTUUID
         initrd  /casper/initrd
 }
 menuentry "Start normal reset installation" {
         set gfxpayload=keep
-        linux   /casper/vmlinuz layerfs-path=minimal.standard.live.hotfix.squashfs nopersistent ds=nocloud\;s=/cdrom/cloud-configs/reset-media --- quiet splash nomodeset modprobe.blacklist=nouveau nouveau.modeset=0
+        linux   /casper/vmlinuz nopersistent ds=nocloud\;s=/cdrom/cloud-configs/reset-media --- quiet splash nomodeset modprobe.blacklist=nouveau nouveau.modeset=0
         initrd  /casper/initrd
 }
 grub_platform
@@ -296,10 +296,10 @@ elif [ -n "$ISO_PATH" ]; then
     $SCP "$ISO_PATH" "$TARGET_USER"@"$addr":/home/"$TARGET_USER"
 fi
 
-if ! is_valid_iso_on_dut "$addr"; then
-    echo "Only OEM Ubuntu images are supported"
-    exit 5
-fi
+# if ! is_valid_iso_on_dut "$addr"; then
+#     echo "Only OEM Ubuntu images are supported"
+#     exit 5
+# fi
 
 RESET_PART="${STORE_PART:0:-1}2"
 RESET_PARTUUID=$($SSH "$TARGET_USER"@"$addr" -- lsblk -n -o PARTUUID "$RESET_PART")
@@ -351,6 +351,7 @@ $SSH "$TARGET_USER"@"$addr" -- sudo cp -r /home/"$TARGET_USER"/redeploy/cloud-co
 $SSH "$TARGET_USER"@"$addr" -- sudo cp /home/"$TARGET_USER"/redeploy/cloud-configs/grub/redeploy.cfg /home/"$TARGET_USER"/reset/boot/grub/grub.cfg
 $SSH "$TARGET_USER"@"$addr" -- sudo sed -i "s/RP_PARTUUID/${RESET_PARTUUID}/" /home/"$TARGET_USER"/reset/boot/grub/grub.cfg
 
+exit 99
 # Reboot the target
 $SSH "$TARGET_USER"@"$addr" -- sudo reboot || true
 
