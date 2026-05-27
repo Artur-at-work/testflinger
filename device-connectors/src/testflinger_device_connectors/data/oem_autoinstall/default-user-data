@@ -157,6 +157,18 @@ autoinstall:
         path: /usr/bin/set_ubuntu_boot.sh
         permissions: '0755'
 
+      - content: |
+          # Installer networking was off and subiquity doesn't turn it on
+          # Below enables dhcp networking in provisioned system by cloud init on first boot
+          network:
+            version: 2
+            ethernets:
+              all-wired:
+                match: {}
+                dhcp4: true
+        path: /etc/netplan/00-installer-config.yaml
+        permissions: '0600'
+
     users:
       - name: ubuntu
         groups: [adm, sudo]
@@ -179,6 +191,9 @@ autoinstall:
       - ["sudo", "-u", "ubuntu", "-H", "gsettings", "reset-recursively", "org.gnome.desktop.session"]
       - ["sudo", "-u", "ubuntu", "-H", "gsettings", "reset-recursively", "org.gnome.desktop.screensaver"]
       - ["/usr/bin/set_usb_boot.sh"]
+      # reload netplan for write_files to take effect and wait until got dhcp ip
+      - netplan apply
+      - "timeout 60 bash -c 'until ip route show default | grep -q default; do sleep 1; done'"
       # update Chrome's public keys to avoid error in apt update
       - wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | tee /etc/apt/trusted.gpg.d/google-chrome.asc > /dev/null
       - apt-get update -yq
